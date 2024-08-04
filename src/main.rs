@@ -9,18 +9,18 @@ use renderer::print_screen_staging;
 mod command_hooks;
 use command_hooks::{decrypt, verify};
 
-
-struct State {
-    head: Option<Vec<String>>,
-    body: Option<Vec<String>>,
-    tail: Option<Vec<String>>,
-}   static mut PROGRAM_STATE: State = State { head: None, body: None, tail: None };
-
 fn main() {
 
+    struct State {
+        head: Option<Vec<String>>,
+        body: Option<Vec<String>>,
+        tail: Option<Vec<String>>,
+    }   let mut PROGRAM_STATE: State = State { head: None, body: None, tail: None };
+
     /* Get message */
-    let head = vec![String::from("Enter or paste your message and write ':q' when your finished.")];
-    print_screen_staging(&head, None, None);
+    PROGRAM_STATE.head = Some(vec![String::from("Enter or paste your message and write ':q' when your finished.")]);
+    //let head = vec![String::from("Enter or paste your message and write ':q' when your finished.")];
+    print_screen_staging(&PROGRAM_STATE.head, None, None);
 
     let mut message: Vec<String> = Vec::new();
     loop {
@@ -40,6 +40,7 @@ fn main() {
     /* Get operation */
     let head = vec![String::from("Operations: d - decrypt, v - verify"), String::from("You can chain operations - 'dv' => decrypt and verify, 'ce' => clearsign and encrypt.")];
     let pseudo_tail: Vec<String> = Vec::new();
+    
     print_screen_staging(&head, Some(&message), Some(&pseudo_tail));
 
     let mut buffer = String::new();
