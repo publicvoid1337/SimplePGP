@@ -1,3 +1,4 @@
+use std::borrow::BorrowMut;
 use std::process::exit;
 use std::io;
 use std::vec;
@@ -11,16 +12,12 @@ use command_hooks::{decrypt, verify};
 
 fn main() {
 
-    struct State {
-        head: Option<Vec<String>>,
-        body: Option<Vec<String>>,
-        tail: Option<Vec<String>>,
-    }   let mut PROGRAM_STATE: State = State { head: None, body: None, tail: None };
+    let mut PROGRAM_STATE = renderer::ScreenState::new();
 
     /* Get message */
     PROGRAM_STATE.head = Some(vec![String::from("Enter or paste your message and write ':q' when your finished.")]);
     //let head = vec![String::from("Enter or paste your message and write ':q' when your finished.")];
-    print_screen_staging(&PROGRAM_STATE.head, None, None);
+    renderer::print_screen_staging2(&PROGRAM_STATE);
 
     let mut message: Vec<String> = Vec::new();
     loop {
@@ -31,8 +28,10 @@ fn main() {
             break;
         }
 
-        message.push(buffer);   // dont push buffer.trim() because '\n' is implemented in OpenPGP standard
-        print_screen_staging(&head, Some(&message), None);
+        PROGRAM_STATE.push(buffer);
+        //message.push(buffer);   // dont push buffer.trim() because '\n' is implemented in OpenPGP standard
+        renderer::print_screen_staging2(&PROGRAM_STATE);        
+        //print_screen_staging(&head, Some(&message), None);
     }
     /* ---------- */
 

@@ -1,87 +1,88 @@
-pub fn print_screen_staging(head: &Vec<String>, message: Option<&Vec<String>>, tail: Option<&Vec<String>>) {
-    
-    print!("{esc}c", esc = 27 as char);
-    
-    let mut longest_line_length: usize = 0;
+const ESC: char = 27 as char;
 
-    for line in head {
-        if line.len() < longest_line_length { continue; }
-        longest_line_length = line.len();
-    }
-    if let Some(message_unwrapped) = message {
-        for line in message_unwrapped {
-            if line.len() < longest_line_length { continue; }
-            longest_line_length = line.len();
-        }
-    }
-    if let Some(tail_unwrapped) = tail {
-        for line in tail_unwrapped {
-            if line.len() < longest_line_length { continue; }
-            longest_line_length = line.len();
-        }
-    }
 
-    for line in head {
-        print!("{}", format!("{}{}\n", " ".repeat((longest_line_length - line.len()) / 2), line));
-    }
-    println!("\n{}\n", "=".repeat(longest_line_length));
+pub enum ScreenPart {
+    Head,
+    Body,
+    Tail
+}
+use ScreenPart::{Head, Body, Tail};
 
-    if let Some(message_unwrapped) = message {
-        for line in message_unwrapped {
-            print!("{}", line);
-        }
-    }
 
-    if let Some(tail_unwrapped) = tail {
-        println!("\n{}\n", "=".repeat(longest_line_length));
-
-        for line in tail_unwrapped {
-            print!("{}", format!("{}{}", " ".repeat((longest_line_length - line.len()) / 2), line));
-        }
-    }
-
+pub struct ScreenState {
+    head: Option<Vec<String>>,
+    body: Option<Vec<String>>,
+    tail: Option<Vec<String>>,
+    longest_line_length: usize
 }
 
-pub fn print_screen_staging2(head: &Vec<String>, message: Option<&Vec<String>>, tail: Option<&Vec<String>>) {
+impl ScreenState {
+    pub fn new() -> Self {
+        Self { head: None, body: None, tail: None, longest_line_length: 0 }
+    }
     
-    print!("{esc}c", esc = 27 as char);
-    
-    let mut longest_line_length: usize = 0;
-
-    for line in head {
-        if line.len() < longest_line_length { continue; }
-        longest_line_length = line.len();
-    }
-    if let Some(message_unwrapped) = message {
-        for line in message_unwrapped {
-            if line.len() < longest_line_length { continue; }
-            longest_line_length = line.len();
+    pub fn push(&mut self, part: ScreenPart, line: String) {
+        let line_length = line.len();
+        if line_length > self.longest_line_length {
+            self.longest_line_length = line_length;
         }
-    }
-    if let Some(tail_unwrapped) = tail {
-        for line in tail_unwrapped {
-            if line.len() < longest_line_length { continue; }
-            longest_line_length = line.len();
-        }
-    }
 
-    for line in head {
-        print!("{}", format!("{}{}\n", " ".repeat((longest_line_length - line.len()) / 2), line));
-    }
-    println!("\n{}\n", "=".repeat(longest_line_length));
+        match part {
+            Head => { 
+                if self.head.is_none() {
+                    self.head = Some(Vec::new())
+                }
+                self.head.as_mut()
+                         .expect("Screenstate::push - Head was not created!")
+                         .push(line);
+            }
 
-    if let Some(message_unwrapped) = message {
-        for line in message_unwrapped {
-            print!("{}", line);
-        }
-    }
+            Body => {
+                if self.body.is_none() {
+                    self.body = Some(Vec::new())
+                }
+                self.body.as_mut()
+                         .expect("Screenstate::push - Body was not created!")
+                         .push(line);
+            }
 
-    if let Some(tail_unwrapped) = tail {
-        println!("\n{}\n", "=".repeat(longest_line_length));
-
-        for line in tail_unwrapped {
-            print!("{}", format!("{}{}", " ".repeat((longest_line_length - line.len()) / 2), line));
+            Tail => {
+                if self.tail.is_none() {
+                    self.tail = Some(Vec::new())
+                }
+                self.tail.as_mut()
+                         .expect("Screenstate::push - Tail was not created!")
+                         .push(line);
+            }
         }
     }
 
+    pub fn print_screen(&self) {
+
+        //clear screen
+        print!("{ESC}c");
+
+        if let Some(head) = &self.head {
+            for line in head {
+                print!("{}", format!("{}{}\n", " ".repeat((self.longest_line_length - line.len()) / 2), line));
+            }
+
+            println!("\n{}\n", "=".repeat(self.longest_line_length));
+        }
+
+        if let Some(body) = & self.body {
+            for line in body {
+                print!("{}", line);
+            }
+        }
+
+        if let Some(tail) = &self.tail {
+            println!("\n{}\n", "=".repeat(self.longest_line_length));
+
+            for line in tail {
+                print!("{}", format!("{}{}", " ".repeat((self.longest_line_length - line.len()) / 2), line));
+            }
+        }
+
+    }
 }
