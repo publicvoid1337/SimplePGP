@@ -1,23 +1,20 @@
-use std::borrow::BorrowMut;
 use std::process::exit;
 use std::io;
-use std::vec;
 
 
 mod renderer;
-use renderer::print_screen_staging;
+use renderer::{ScreenState, ScreenPart};
 
 mod command_hooks;
 use command_hooks::{decrypt, verify};
 
 fn main() {
 
-    let mut PROGRAM_STATE = renderer::ScreenState::new();
+    let mut screen = ScreenState::new();
 
     /* Get message */
-    PROGRAM_STATE.head = Some(vec![String::from("Enter or paste your message and write ':q' when your finished.")]);
-    //let head = vec![String::from("Enter or paste your message and write ':q' when your finished.")];
-    renderer::print_screen_staging2(&PROGRAM_STATE);
+    screen.push(ScreenPart::Head, "Enter or paste your message and write ':q' when your finished.".to_string());
+    screen.print_screen();
 
     let mut message: Vec<String> = Vec::new();
     loop {
@@ -28,19 +25,18 @@ fn main() {
             break;
         }
 
-        PROGRAM_STATE.push(buffer);
-        //message.push(buffer);   // dont push buffer.trim() because '\n' is implemented in OpenPGP standard
-        renderer::print_screen_staging2(&PROGRAM_STATE);        
-        //print_screen_staging(&head, Some(&message), None);
+        screen.push(ScreenPart::Body, buffer);   // dont push buffer.trim() because '\n' is implemented in OpenPGP standard
+        screen.print_screen();
     }
     /* ---------- */
 
 
     /* Get operation */
-    let head = vec![String::from("Operations: d - decrypt, v - verify"), String::from("You can chain operations - 'dv' => decrypt and verify, 'ce' => clearsign and encrypt.")];
-    let pseudo_tail: Vec<String> = Vec::new();
-    
-    print_screen_staging(&head, Some(&message), Some(&pseudo_tail));
+    screen.clear(ScreenPart::Head);
+    screen.push(ScreenPart::Head, "Operations: d - decrypt, v - verify".to_string());
+    screen.push(ScreenPart::Head, "You can chain operations - 'dv' => decrypt and verify, 'ce' => clearsign and encrypt.".to_string());  
+    screen.push(ScreenPart::Tail, "".to_string());  
+    screen.print_screen();
 
     let mut buffer = String::new();
     io::stdin().read_line(&mut buffer).unwrap();
@@ -62,7 +58,7 @@ fn main() {
         }
     }
 
-    print_screen_staging(&head, Some(&message), Some(&tail));
+    screen.print_screen();
 
 }
 

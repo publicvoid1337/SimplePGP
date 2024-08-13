@@ -57,6 +57,16 @@ impl ScreenState {
         }
     }
 
+    pub fn clear(&mut self, part: ScreenPart) {
+
+        match part {
+            Head => { self.head = None }
+            Body => { self.body = None }
+            Tail => { self.tail = None }
+        }
+
+    }
+
     pub fn print_screen(&self) {
 
         //clear screen
@@ -85,4 +95,5 @@ impl ScreenState {
         }
 
     }
+
 }
