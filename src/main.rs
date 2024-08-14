@@ -6,7 +6,7 @@ mod renderer;
 use renderer::{ApplicationState, ScreenPart};
 
 mod command_hooks;
-use command_hooks::{decrypt, verify};
+use command_hooks::CommandRx;
 
 
 
@@ -47,13 +47,13 @@ fn main() {
         match char {
            'd' => {
                 //get_result(&mut message, decrypt, &mut tail);
-                let cmd = command_hooks::CommandOutput::decrypt(&screen.body);
+                let cmd = CommandRx::decrypt_staging(&screen.body);
                 screen.update_screen(cmd);
             },
 
             'v' => {
                 //get_result(&mut message, verify, &mut tail);
-                let cmd = command_hooks::CommandOutput::verify(&screen.body);
+                let cmd = CommandRx::verify_staging(&screen.body);
                 screen.update_screen(cmd);
             },
 

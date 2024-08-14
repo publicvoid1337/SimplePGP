@@ -1,5 +1,5 @@
 const ESC: char = 27 as char;
-use crate::command_hooks::CommandOutput;
+use crate::command_hooks::CommandRx;
 
 
 pub enum ScreenPart {
@@ -93,7 +93,7 @@ impl ApplicationState {
     }
 
     // consumes CommandOutput Object
-    pub fn update_screen(&mut self, mut command: CommandOutput) {
+    pub fn update_screen(&mut self, mut command: CommandRx) {
 
         self.push(Tail, command.status);
         
