@@ -1,4 +1,5 @@
 const ESC: char = 27 as char;
+use crate::command_hooks::CommandOutput;
 
 
 pub enum ScreenPart {
@@ -9,14 +10,14 @@ pub enum ScreenPart {
 use ScreenPart::{Head, Body, Tail};
 
 
-pub struct ScreenState {
+pub struct ApplicationState {
     head: Vec<String>,
-    body: Vec<String>,
+    pub body: Vec<String>,
     tail: Vec<String>,
     max_len: usize
 }
 
-impl ScreenState {
+impl ApplicationState {
     pub fn new() -> Self {
         Self { head: Vec::new(), body: Vec::new(), tail: Vec::new(), max_len: 0 }
     }
@@ -37,6 +38,13 @@ impl ScreenState {
     }
 
     pub fn append(&mut self, part: ScreenPart, lines: &mut Vec<String>) {
+
+        for line in lines.iter() {
+            let line_length = line.len();
+            if line_length > self.max_len {
+                self.max_len = line_length;
+            }
+        }
         
         match part {
             Head => { self.head.append(lines) }
@@ -80,6 +88,20 @@ impl ScreenState {
         }
         for line in self.tail.iter() {
             print!("{}", format!("{}{}", " ".repeat((self.max_len - line.len()) / 2), line));
+        }
+
+    }
+
+    // consumes CommandOutput Object
+    pub fn update_screen(&mut self, mut command: CommandOutput) {
+
+        self.push(Tail, command.status);
+        
+        // might be wrong
+        if let Some(content) = &mut command.content {
+            content.pop();
+            self.clear(Body);
+            self.append(Body, content)
         }
 
     }
