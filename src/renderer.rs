@@ -7,6 +7,7 @@ pub enum ScreenPart {
     Body,
     Tail
 }
+
 use ScreenPart::{Head, Body, Tail};
 
 
